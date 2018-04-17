@@ -48,6 +48,102 @@ export const constantRouterMap = [
     }]
   },
   {
+    path: '/wendang',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Wendang',
+        component: () => import('@/views/wendang/index'),
+        meta: { title: '文档', icon: 'wendang' }
+      }
+    ]
+  },
+  {
+    path: '/kebiao',
+    component: Layout,
+    redirect: '/kebiao/gaozhong',
+    name: 'Kebiao',
+    meta: { title: '课表管理', icon: 'kebiao' },
+    children: [
+      {
+        path: 'gaozhong',
+        name: 'Gaozhong',
+        component: () => import('@/views/gaozhong/index'),
+        meta: { title: '高中课表', icon: 'gaozhong' }
+      },
+      {
+        path: 'chuzhong',
+        name: 'Chuzhong',
+        component: () => import('@/views/chuzhong/index'),
+        meta: { title: '初中课表', icon: 'chuzhong' }
+      },
+      {
+        path: 'xiaoxue',
+        name: 'Xiaoxue',
+        component: () => import('@/views/xiaoxue/index'),
+        meta: { title: '小学课表', icon: 'xiaoxue' }
+      }
+    ]
+  },
+  {
+    path: '/jiaoshi',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Jiaoshi',
+        component: () => import('@/views/jiaoshi/index'),
+        meta: { title: '教师信息', icon: 'jiaoshi' }
+      }
+    ]
+  },
+  {
+    path: '/xinwen',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Xinwen',
+        component: () => import('@/views/xinwen/index'),
+        meta: { title: '新闻管理', icon: 'xinwen' }
+      }
+    ]
+  },
+  {
+    path: '/shipin',
+    component: Layout,
+    redirect: '/shipin/pc_shipin',
+    name: 'Shipin',
+    meta: { title: '视频', icon: 'shipin_guanli' },
+    children: [
+      {
+        path: 'pc_shipin',
+        name: 'Pc_shipin',
+        component: () => import('@/views/pc_shipin/index'),
+        meta: { title: '官网视频', icon: 'pc' }
+      },
+      {
+        path: 'xiaochengxu_shipin',
+        name: 'Xiaochengxu_shipin',
+        component: () => import('@/views/xiaochengxu_shipin/index'),
+        meta: { title: '小程序视频', icon: 'xiaochengxu' }
+      }
+    ]
+  },
+  {
+    path: '/luntan',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Luntan',
+        component: () => import('@/views/luntan/index'),
+        meta: { title: '论坛', icon: 'luntan' }
+      }
+    ]
+  },
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',
