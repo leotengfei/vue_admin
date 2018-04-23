@@ -4,7 +4,7 @@ import 'normalize.css/normalize.css'// A modern alternative to CSS resets
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/en'
+// import locale from 'element-ui/lib/locale/lang/en'   //语言设置为英文
 
 import '@/styles/index.scss' // global css
 
@@ -16,7 +16,7 @@ import '@/icons' // icon
 import '@/errorLog'// error log
 import '@/permission' // permission control
 
-Vue.use(ElementUI, { locale })
+Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 
