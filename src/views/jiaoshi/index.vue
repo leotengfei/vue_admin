@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-container">
     <h1>教师信息管理区域</h1>
   </div>
 </template>
