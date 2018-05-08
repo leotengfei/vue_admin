@@ -101,12 +101,21 @@ export const constantRouterMap = [
   {
     path: '/xinwen',
     component: Layout,
+    redirect: '/xinwen/x_guanli',
+    name: 'Xinwen',
+    meta: { title: '新闻管理', icon: 'xinwen' },
     children: [
       {
-        path: 'index',
-        name: 'Xinwen',
+        path: 'x_guanli',
+        name: 'X_guanli',
         component: () => import('@/views/xinwen/index'),
-        meta: { title: '新闻管理', icon: 'xinwen' }
+        meta: { title: '新闻列表', icon: 'xinwen' }
+      },
+      {
+        path: 'x_tianjia',
+        name: 'X_tianjia',
+        component: () => import('@/views/x_tianjia/index'),
+        meta: { title: '添加新闻页', icon: 'xinwen' }
       }
     ]
   },
