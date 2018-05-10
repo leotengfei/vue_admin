@@ -114,8 +114,15 @@ export const constantRouterMap = [
       {
         path: 'x_tianjia',
         name: 'X_tianjia',
-        component: () => import('@/views/x_tianjia/index'),
+        component: () => import('@/views/x_tianjia/create.vue'),
         meta: { title: '添加新闻页', icon: 'xinwen' }
+      },
+      {
+        path: 'x_bianji',
+        name: 'X_bianji',
+        hidden: true,
+        component: () => import('@/views/x_tianjia/edit.vue'),
+        meta: { title: '编辑新闻页面', icon: 'xinwen' }
       }
     ]
   },
