@@ -16,6 +16,10 @@ import '@/icons' // icon
 import '@/errorLog'// error log
 import '@/permission' // permission control
 
+import VoerroTagsInput from '@voerro/vue-tagsinput'
+
+Vue.component('tags-input', VoerroTagsInput) // 引入tags-input
+
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
