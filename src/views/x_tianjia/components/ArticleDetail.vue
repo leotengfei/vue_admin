@@ -98,7 +98,7 @@
 import Tinymce from '@/components/Tinymce'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
-import VoerroTagsInput from '@voerro/vue-tagsinput'
+import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
@@ -117,7 +117,7 @@ const defaultForm = {
 
 export default {
   name: 'articleDetail',
-  components: { Tinymce, MDinput, Sticky, VoerroTagsInput },
+  components: { Tinymce, MDinput, Sticky, tagsInput },
   props: {
     isEdit: {
       type: Boolean,
