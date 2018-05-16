@@ -9,29 +9,6 @@
             <el-button type="info">添加新闻</el-button>
           </router-link>
 
-          <el-dropdown trigger="click">
-            <el-tooltip class="item" effect="dark" content="文章等级" placement="top">
-              <el-button plain>{{ postForm.article_hotness | statusFilter }}
-                <i class="el-icon-caret-bottom el-icon--right"></i>
-              </el-button>
-            </el-tooltip>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>
-                <div class="block">
-                  <el-slider
-                    v-model="postForm.article_hotness"
-                    vertical
-                    height="200px"
-                    :step="25"
-                    show-stops
-                     :format-tooltip="formatTooltip"
-                    >
-                  </el-slider>
-                </div>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-
           <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm()">发布
           </el-button>
           <el-button v-loading="loading" type="warning" @click="draftForm">草稿</el-button>
@@ -51,51 +28,65 @@
                 标题
               </MDinput>
               <span v-show="postForm.title.length>=26" class='title-prompt'>app可能会显示不全</span>
+              <span class="word-counter" v-show="contentShortLength">{{contentShortLength}}字</span>
             </el-form-item>
 
             <div class="postInfo-container">
               <el-row>
-                <el-col :span="8">
-                  <el-form-item label-width="45px" label="作者:" class="postInfo-container-item">
-                    <multiselect v-model="postForm.author" :options="userLIstOptions" @search-change="getRemoteUserList" placeholder="搜索用户" selectLabel="选择"
-                      deselectLabel="删除" track-by="key" :internalSearch="false" label="key">
-                      <span slot='noResult'>无结果</span>
-                    </multiselect>
-                  </el-form-item>
-                </el-col>
-
-                <el-col :span="8">
-                  <el-tooltip class="item" effect="dark" content="将替换作者" placement="top">
-                    <el-form-item label-width="50px" label="来源:" class="postInfo-container-item">
-                      <el-input placeholder="将替换作者" style='min-width:150px;' v-model="postForm.source_name">
-                      </el-input>
-                    </el-form-item>
-                  </el-tooltip>
-                </el-col>
-
                 <el-col :span="8">
                   <el-form-item label-width="80px" label="发布时间:" class="postInfo-container-item">
                     <el-date-picker v-model="postForm.display_time" type="date" format="yyyy-MM-dd" placeholder="选择日期时间">
                     </el-date-picker>
                   </el-form-item>
                 </el-col>
+
+
+                <el-col :span="8">
+                  <el-form-item label-width="80px" label="文章等级:">
+                    <el-rate
+                    style="line-height:2.5;"
+                    :max=4
+                    v-model="postForm.article_hotness"
+                    :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                    :texts="['普通', '优先', '热点', '置顶']"
+                    show-text 
+                    >
+                    </el-rate>
+                  </el-form-item>
+                </el-col>
               </el-row>
             </div>
           </el-col>
         </el-row>
-
-        <el-form-item style="margin-bottom: 40px;" label-width="45px" label="摘要:">
-          <el-input type="textarea" class="article-textarea" :rows="1" autosize placeholder="请输入内容" v-model="postForm.content_short">
-          </el-input>
-          <span class="word-counter" v-show="contentShortLength">{{contentShortLength}}字</span>
+        <el-form-item style="margin-bottom: 40px;" label-width="45px" label="标签:">
+            <!-- 预留 -->
+            <tags-input element-id="tags"
+            v-model="postForm.selectedTags"
+            placeholder="输入后按回车键添加"
+            :existing-tags="{ 
+            'web-development': 'Web Development',
+            'php': 'PHP',
+            'javascript': 'JavaScript',
+            }"
+            :typeahead="true"></tags-input>
         </el-form-item>
-
+        <div style="margin-bottom: 20px;">
+          <el-upload
+            action="https://jsonplaceholder.typicode.com/posts/"
+            :multiple="false"
+            :limit=1
+            :before-upload="beforeAvatarUpload"
+            list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove">
+            <i class="el-icon-plus"></i>
+          </el-upload>
+          <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="dialogImageUrl" alt="">
+          </el-dialog>
+        </div>
         <div class="editor-container">
           <tinymce :height=400 ref="editor" v-model="postForm.content"></tinymce>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <Upload v-model="postForm.image_uri"></Upload>
         </div>
       </div>
     </el-form>
@@ -106,9 +97,9 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import MDinput from '@/components/MDinput'
-import Multiselect from 'vue-multiselect'// 使用的一个多选框组件，element-ui的select不能满足所有需求
-import 'vue-multiselect/dist/vue-multiselect.min.css'// 多选框组件css
 import Sticky from '@/components/Sticky' // 粘性header组件
+import tagsInput from '@voerro/vue-tagsinput'
+import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
 // import { userSearch } from '@/api/remoteSearch'
@@ -117,17 +108,16 @@ const defaultForm = {
   status: 'draft',
   title: '', // 文章题目
   content: '', // 文章内容
-  content_short: '', // 文章摘要
   image_uri: '', // 文章图片
-  source_name: '', // 文章外部作者
   display_time: undefined, // 前台展示时间
   id: undefined,
-  article_hotness: ''
+  article_hotness: 1, // 文章等级
+  selectedTags: [] // 文章标签
 }
 
 export default {
   name: 'articleDetail',
-  components: { Tinymce, MDinput, Multiselect, Sticky },
+  components: { Tinymce, MDinput, Sticky, tagsInput },
   props: {
     isEdit: {
       type: Boolean,
@@ -137,38 +127,50 @@ export default {
   data() {
     return {
       postForm: Object.assign({}, defaultForm),
+      dialogImageUrl: '',
+      dialogVisible: false,
       fetchSuccess: true,
       loading: false,
       userLIstOptions: [],
       rules: {
-      }
+      },
+      selectedTags: []
     }
   },
   computed: {
     contentShortLength() {
-      return this.postForm.content_short.length
+      return this.postForm.title.length
     }
   },
   created() {
     if (this.isEdit) {
-      this.fetchData()
+      // this.fetchData()
     } else {
       this.postForm = Object.assign({}, defaultForm)
     }
   },
   methods: {
-    formatTooltip(val) {
-      if (val === 0) {
-        return '原始'
-      } else if (val === 25) {
-        return '普通'
-      } else if (val === 50) {
-        return '优先'
-      } else if (val === 75) {
-        return '热点'
-      } else if (val === 100) {
-        return '置顶'
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    handleAvatarSuccess(res, file) {
+      this.imageUrl = URL.createObjectURL(file.raw)
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 / 1024 < 2
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!')
       }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!')
+      }
+      return isJPG && isLt2M
     },
     submitForm() {
       this.postForm.display_time = parseInt(this.display_time / 1000)
@@ -205,18 +207,6 @@ export default {
         duration: 1000
       })
       this.postForm.status = 'draft'
-    }
-  },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        0: '原始',
-        25: '普通',
-        50: '优先',
-        75: '热点',
-        100: '置顶'
-      }
-      return statusMap[status]
     }
   }
 }
