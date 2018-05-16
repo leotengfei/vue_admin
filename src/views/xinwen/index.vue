@@ -34,10 +34,23 @@
           <span>{{scope.row.nDate}}</span>
         </template>
       </el-table-column>
-      <el-table-column min-width="150px" label="标题">
+      <el-table-column min-width="100px" label="标题">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{scope.row.title}}</span>
           <el-tag>{{scope.row.type | typeFilter}}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column min-width="50px" label="等级">
+        <template slot-scope="scope">
+          <!-- <span class="link-type" @click="handleUpdate(scope.row)">{{scope.row.title}}</span> -->
+          <el-rate
+            disabled
+            :max=4
+            v-model="scope.row.hotness"
+            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+            :texts="['普通', '优先', '热点', '置顶']"
+            show-text >
+          </el-rate>
         </template>
       </el-table-column>
       <el-table-column min-width="50px" align="center" label="标签">
@@ -60,7 +73,20 @@
       </el-table-column>
     </el-table>
     <!-- 分页插件区域 -->
-    <div></div>
+    <div>
+  <div class="fenye">
+    <el-pagination
+      background
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[100, 200, 300, 400]"
+      :page-size="100"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="400">
+    </el-pagination>
+  </div>
+    </div>
     <!-- 弹窗内容区域 -->
   </div>
 </template>
@@ -86,12 +112,14 @@ export default {
   },
   data() {
     return {
+      currentPage: 1,
       tableKey: 0,
       list: [
         {
           nid: 0,
           nDate: '2018/4/24',
           title: '这是第一条新闻标题',
+          hotness: 4,
           type: 'POL',
           status: 'unview',
           tags: ['高考', '政策', '数学']
@@ -136,6 +164,14 @@ export default {
       listLoading: false
     }
   },
+  methods: {
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+    }
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -163,6 +199,8 @@ export default {
 </script>
 
 <style scoped>
-
+.fenye{
+  margin-top:30px;
+}
 </style>
 
