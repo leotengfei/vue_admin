@@ -101,7 +101,7 @@
                   :on-remove="handleRemoveList"
                   :before-remove="beforeRemoveList"
                   multiple
-                  :on-exceed="handleExceed"
+                  :on-exceed="handleExceedList"
                   :file-list="fileList">
                 <el-button size="small" type="primary">点击上传</el-button>
                 <div slot="tip" class="el-upload__tip">上传格式为mp4的视频文件</div>
@@ -184,19 +184,19 @@ export default {
         this.$message.error('上传头像图片大小不能超过 2MB!')
       }
       return (isJPG || isSVG) && isLt2M
+    },
+    handleRemoveList(file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePreviewList(file) {
+      console.log(file)
+    },
+    handleExceedList(files, fileList) {
+      this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+    },
+    beforeRemoveList(file, fileList) {
+      return this.$confirm(`确定移除 $ { file.name }？`)
     }
-  },
-  handleRemoveList(file, fileList) {
-    console.log(file, fileList)
-  },
-  handlePreviewList(file) {
-    console.log(file)
-  },
-  handleExceedList(files, fileList) {
-    this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
-  },
-  beforeRemoveList(file, fileList) {
-    return this.$confirm(`确定移除 $ { file.name }？`)
   },
   computed: {
     contentShortLength() {
