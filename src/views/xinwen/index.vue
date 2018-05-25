@@ -26,17 +26,17 @@
       style="width: 100%">
       <el-table-column align="center" label="序号" width="65">
         <template slot-scope="scope">
-          <span>{{scope.row.nid}}</span>
+          <span>{{scope.row.id}}</span>
         </template>
       </el-table-column>
       <el-table-column width="150px" align="center" label="日期">
         <template slot-scope="scope">
-          <span>{{scope.row.nDate}}</span>
+          <span>{{scope.row.time}}</span>
         </template>
       </el-table-column>
       <el-table-column min-width="100px" label="标题">
         <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{scope.row.title}}</span>
+          <span class="link-type" @click="handleViewContent(scope.row.id)">{{scope.row.title}}</span>
           <el-tag>{{scope.row.type | typeFilter}}</el-tag>
         </template>
       </el-table-column>
@@ -46,7 +46,7 @@
           <el-rate
             disabled
             :max=4
-            v-model="scope.row.hotness"
+            v-model="scope.row.weight"
             :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
             :texts="['普通', '优先', '热点', '置顶']"
             show-text >
@@ -55,7 +55,7 @@
       </el-table-column>
       <el-table-column min-width="50px" align="center" label="标签">
         <template slot-scope="scope">
-          <el-tag v-for="(item,key) in scope.row.tags" :key='key' style="marginRight:8px;">{{item}}</el-tag>
+          <el-tag v-for="(item,key) in scope.row.name" :key='key' style="marginRight:8px;">{{item}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="状态" width="100">
@@ -81,9 +81,9 @@
       @current-change="handleCurrentChange"
       :current-page="currentPage"
       :page-sizes="[10, 20, 30, 40]"
-      :page-size="10"
+      :page-size="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="400">
+      :total="total">
     </el-pagination>
   </div>
     </div>
@@ -92,7 +92,7 @@
 </template>
 
 <script>
-// import { fetchList } from '@/api/xinwen'
+import { getList, getNewsContent } from '@/api/xinwen'
 import waves from '@/directive/waves' // 水波纹指令
 
 const fenleiTypeOptions = [
@@ -113,16 +113,18 @@ export default {
   data() {
     return {
       currentPage: 1,
+      pageSize: 10,
+      total: 10,
       tableKey: 0,
       list: [
         {
-          nid: 0,
-          nDate: '2018/4/24',
+          id: 0,
+          time: '2018/4/24',
           title: '这是第一条新闻标题',
-          hotness: 4,
+          weight: 4,
           type: 'POL',
           status: 'unview',
-          tags: ['高考', '政策', '数学']
+          name: ['高考', '政策', '数学']
         }
       ],
       listQuery: {
@@ -166,11 +168,40 @@ export default {
   },
   methods: {
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      this.listLoading = true
+      // console.log(`每页 ${val} 条`)
+      this.pageSize = val
+      this.fetchData(this.pageSize, this.currentPage)
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      // console.log(`当前页: ${val}`)
+      this.listLoading = true
+      this.currentPage = val
+      this.fetchData(this.pageSize, this.currentPage)
+    },
+    fetchData(pageSize, currentPage) {
+      getList(pageSize, currentPage).then(response => {
+        // console.log(response.data)
+        this.listLoading = false
+        this.list = response.data
+        this.total = response.count
+      }).catch(err => {
+        this.fetchSuccess = false
+        console.log(err)
+      })
+    },
+    handleViewContent(nid) {
+      // 查看文章内容
+      getNewsContent(nid).then(response => {
+        console.log(response.content)
+      }).catch(err => {
+        console.log(err)
+      })
     }
+  },
+  created() {
+    this.listLoading = true
+    this.fetchData(this.pageSize, this.currentPage)
   },
   filters: {
     statusFilter(status) {
