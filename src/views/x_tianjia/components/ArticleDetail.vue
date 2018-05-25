@@ -58,7 +58,7 @@
             </div>
           </el-col>
         </el-row>
-        <el-form-item style="margin-bottom: 40px;" label-width="45px" label="标签:">
+        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="标签:">
             <!-- 预留 -->
             <tags-input element-id="tags"
             v-model="postForm.selectedTags"

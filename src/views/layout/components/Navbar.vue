@@ -59,6 +59,7 @@ export default {
     },
     logout() {
       this.$store.dispatch('LogOut').then(() => {
+        console.log('退出登陆执行成功')
         location.reload() // 为了重新实例化vue-router对象 避免bug
       })
     }
