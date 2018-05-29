@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container xinwen">
     <!-- 顶部操作按钮区域 -->
     <div class="filter-container">
       <el-input style="width: 200px;" class="filter-item" placeholder="标题" v-model="listQuery.title">
@@ -72,8 +72,8 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页插件区域 -->
     <div>
+  <!-- 分页插件区域 -->
   <div class="fenye">
     <el-pagination
       background
@@ -88,6 +88,16 @@
   </div>
     </div>
     <!-- 弹窗内容区域 -->
+      <el-dialog
+        title="预览文章内容"
+        :visible.sync="centerDialogVisible"
+        width="45%"
+        center>
+        <div v-html="centerDialogContent" v-loading="dialogLoading" class="mydialog"></div>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="centerDialogVisible = false">关闭</el-button>
+        </span>
+      </el-dialog>
   </div>
 </template>
 
@@ -112,6 +122,9 @@ export default {
   },
   data() {
     return {
+      centerDialogVisible: false,
+      dialogLoading: false,
+      centerDialogContent: '',
       currentPage: 1,
       pageSize: 10,
       total: 10,
@@ -169,17 +182,18 @@ export default {
   methods: {
     handleSizeChange(val) {
       this.listLoading = true
-      // console.log(`每页 ${val} 条`)
+      // console.log(`每页 ${val} 条`) 改变分页大小
       this.pageSize = val
       this.fetchData(this.pageSize, this.currentPage)
     },
     handleCurrentChange(val) {
-      // console.log(`当前页: ${val}`)
+      // console.log(`当前页: ${val}`) 分页改变当前页
       this.listLoading = true
       this.currentPage = val
       this.fetchData(this.pageSize, this.currentPage)
     },
     fetchData(pageSize, currentPage) {
+      // 加载数据
       getList(pageSize, currentPage).then(response => {
         // console.log(response.data)
         this.listLoading = false
@@ -192,8 +206,12 @@ export default {
     },
     handleViewContent(nid) {
       // 查看文章内容
+      this.dialogLoading = true
+      this.centerDialogVisible = true
       getNewsContent(nid).then(response => {
         console.log(response.content)
+        this.dialogLoading = false
+        this.centerDialogContent = response.content
       }).catch(err => {
         console.log(err)
       })
@@ -229,9 +247,18 @@ export default {
 }
 </script>
 
-<style scoped>
-.fenye{
+<style lang="scss">
+.xinwen{
+  .fenye{
   margin-top:30px;
+  }
+  .mydialog img{
+    width: 100% !important;
+    height:auto;
+  }
+  h1{
+    line-height: 1.2em;
+  }
 }
 </style>
 
