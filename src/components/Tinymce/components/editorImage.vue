@@ -3,10 +3,19 @@
     <el-button icon='el-icon-upload' size="mini" :style="{background:color,borderColor:color}" @click=" dialogVisible=true" type="primary">上传图片
     </el-button>
     <el-dialog append-to-body :visible.sync="dialogVisible">
-      <el-upload class="editor-slide-upload" action="https://httpbin.org/post" :multiple="true" :file-list="fileList" :show-file-list="true"
-        list-type="picture-card" :on-remove="handleRemove" :on-success="handleSuccess" :before-upload="beforeUpload">
-        <el-button size="small" type="primary">点击上传</el-button>
-      </el-upload>
+      <el-upload 
+          class="editor-slide-upload" 
+          action="http://up-z1.qiniup.com" 
+          :multiple="true" 
+          :file-list="fileList" 
+          :show-file-list="true"
+          list-type="picture-card" 
+          :on-remove="handleRemove" 
+          :on-success="handleSuccess" 
+          :before-upload="beforeUpload"
+          :data="postData">
+      <el-button size="small" type="primary">点击上传</el-button>
+    </el-upload>
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleSubmit">确 定</el-button>
     </el-dialog>
@@ -14,8 +23,7 @@
 </template>
 
 <script>
-// import { getToken } from 'api/qiniu'
-
+// import { getToken } from '@/api/qiniu'
 export default {
   name: 'editorSlideUpload',
   props: {
@@ -28,7 +36,10 @@ export default {
     return {
       dialogVisible: false,
       listObj: {},
-      fileList: []
+      fileList: [],
+      postData: {
+        token: 'gDYE8KsMjidIuclcNt2Hk3P-t3SaG4wP-DoPCdtg:-l79O62o0OagLOr_SodDWF7mZ2c=:eyJzY29wZSI6InhpYW9jaGVuZ3h1IiwiZGVhZGxpbmUiOjE1Mjc4NDM0NjV9'
+      }
     }
   },
   methods: {
@@ -36,6 +47,7 @@ export default {
       return Object.keys(this.listObj).every(item => this.listObj[item].hasSuccess)
     },
     handleSubmit() {
+      console.log('handleSubmit')
       const arr = Object.keys(this.listObj).map(v => this.listObj[v])
       if (!this.checkAllSuccess()) {
         this.$message('请等待所有图片上传成功 或 出现了网络问题，请刷新页面重新上传！')
@@ -48,6 +60,8 @@ export default {
       this.dialogVisible = false
     },
     handleSuccess(response, file) {
+      console.log('handleSuccess')
+      console.log(file)
       const uid = file.uid
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
@@ -59,6 +73,7 @@ export default {
       }
     },
     handleRemove(file) {
+      console.log('handleRemove')
       const uid = file.uid
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
@@ -69,6 +84,8 @@ export default {
       }
     },
     beforeUpload(file) {
+      console.log('beforeUpload')
+      console.log(file)
       const _self = this
       const _URL = window.URL || window.webkitURL
       const fileName = file.uid
@@ -79,6 +96,10 @@ export default {
         img.onload = function() {
           _self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height }
         }
+        // getToken().then(response => {
+        //   console.log(response)
+        //   this.postData.token = response.token
+        // })
         resolve(true)
       })
     }

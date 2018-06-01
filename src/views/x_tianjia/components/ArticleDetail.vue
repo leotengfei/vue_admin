@@ -35,7 +35,13 @@
               <el-row>
                 <el-col :span="8">
                   <el-form-item label-width="80px" label="发布时间:" class="postInfo-container-item">
-                    <el-date-picker v-model="postForm.display_time" type="date" format="yyyy-MM-dd" placeholder="选择日期时间">
+                    <el-date-picker 
+                      v-model="postForm.time" 
+                      type="date" 
+                      format="yyyy-MM-dd" 
+                      placeholder="选择日期时间"
+                      value-format="yyyy-MM-dd"
+                      >
                     </el-date-picker>
                   </el-form-item>
                 </el-col>
@@ -72,7 +78,7 @@
         </el-form-item>
         <div style="margin-bottom: 20px;">
           <el-upload
-            action="https://jsonplaceholder.typicode.com/posts/"
+            action="http://up-z1.qiniup.com"
             :multiple="false"
             :limit=1
             :before-upload="beforeAvatarUpload"
@@ -108,9 +114,8 @@ const defaultForm = {
   status: 'draft',
   title: '', // 文章题目
   content: '', // 文章内容
-  image_uri: '', // 文章图片
-  display_time: undefined, // 前台展示时间
-  id: undefined,
+  image: '', // 文章图片
+  time: '', // 前台展示时间
   article_hotness: 1, // 文章等级
   selectedTags: [] // 文章标签
 }
@@ -144,12 +149,15 @@ export default {
   },
   created() {
     if (this.isEdit) {
-      // this.fetchData()
+      this.fetchData()
     } else {
       this.postForm = Object.assign({}, defaultForm)
     }
   },
   methods: {
+    fetchData() {
+      console.log('请求数据')
+    },
     handleRemove(file, fileList) {
       console.log(file, fileList)
     },
@@ -158,7 +166,7 @@ export default {
       this.dialogVisible = true
     },
     handleAvatarSuccess(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw)
+      this.postForm.image = URL.createObjectURL(file.raw)
     },
     beforeAvatarUpload(file) {
       const isJPG = file.type === 'image/jpeg'
@@ -173,7 +181,6 @@ export default {
       return isJPG && isLt2M
     },
     submitForm() {
-      this.postForm.display_time = parseInt(this.display_time / 1000)
       console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {

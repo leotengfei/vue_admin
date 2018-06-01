@@ -24,7 +24,7 @@
     <!-- 表格内容区域 -->
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       style="width: 100%">
-      <el-table-column align="center" label="序号" width="65">
+      <el-table-column align="center" label="ID" width="65">
         <template slot-scope="scope">
           <span>{{scope.row.id}}</span>
         </template>
@@ -104,6 +104,7 @@
 <script>
 import { getList, getNewsContent } from '@/api/xinwen'
 import waves from '@/directive/waves' // 水波纹指令
+import nopic from '@/assets/nopic.jpg'
 
 const fenleiTypeOptions = [
   { key: 'POL', display_name: '政策' },
@@ -209,9 +210,15 @@ export default {
       this.dialogLoading = true
       this.centerDialogVisible = true
       getNewsContent(nid).then(response => {
-        console.log(response.content)
         this.dialogLoading = false
-        this.centerDialogContent = response.content
+        var poster = ''
+        if (response.image) {
+          poster = `<img src='${response.image}'></img>`
+        } else {
+          poster = `<img src='${nopic}'></img>`
+          // 没有图的时候加载占位图
+        }
+        this.centerDialogContent = poster + response.content
       }).catch(err => {
         console.log(err)
       })
