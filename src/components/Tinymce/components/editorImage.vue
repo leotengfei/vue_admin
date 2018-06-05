@@ -23,7 +23,7 @@
 </template>
 
 <script>
-// import { getToken } from '@/api/qiniu'
+import { getToken } from '@/api/qiniu'
 export default {
   name: 'editorSlideUpload',
   props: {
@@ -38,7 +38,7 @@ export default {
       listObj: {},
       fileList: [],
       postData: {
-        token: 'gDYE8KsMjidIuclcNt2Hk3P-t3SaG4wP-DoPCdtg:-l79O62o0OagLOr_SodDWF7mZ2c=:eyJzY29wZSI6InhpYW9jaGVuZ3h1IiwiZGVhZGxpbmUiOjE1Mjc4NDM0NjV9'
+        token: ''
       }
     }
   },
@@ -60,13 +60,14 @@ export default {
       this.dialogVisible = false
     },
     handleSuccess(response, file) {
+      console.log(response)
       console.log('handleSuccess')
       console.log(file)
       const uid = file.uid
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
         if (this.listObj[objKeyArr[i]].uid === uid) {
-          this.listObj[objKeyArr[i]].url = response.files.file
+          this.listObj[objKeyArr[i]].url = response.files.file // 拼接七牛云文件路径
           this.listObj[objKeyArr[i]].hasSuccess = true
           return
         }
@@ -96,11 +97,11 @@ export default {
         img.onload = function() {
           _self.listObj[fileName] = { hasSuccess: false, uid: file.uid, width: this.width, height: this.height }
         }
-        // getToken().then(response => {
-        //   console.log(response)
-        //   this.postData.token = response.token
-        // })
-        resolve(true)
+        getToken().then(response => {
+          // console.log(response)
+          this.postData.token = response.msg
+          resolve(true)
+        })
       })
     }
   }
