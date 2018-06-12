@@ -84,7 +84,8 @@
             :before-upload="beforeAvatarUpload"
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove">
+            :on-remove="handleRemove"
+            :data="postData">
             <i class="el-icon-plus"></i>
           </el-upload>
           <el-dialog :visible.sync="dialogVisible">
@@ -106,6 +107,7 @@ import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
+import { getToken } from '@/api/qiniu'
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
 // import { userSearch } from '@/api/remoteSearch'
@@ -139,7 +141,10 @@ export default {
       userLIstOptions: [],
       rules: {
       },
-      selectedTags: []
+      selectedTags: [],
+      postData: {
+        token: ''
+      }
     }
   },
   computed: {
@@ -169,6 +174,10 @@ export default {
       this.postForm.image = URL.createObjectURL(file.raw)
     },
     beforeAvatarUpload(file) {
+      getToken().then(response => {
+        // console.log(response)
+        this.postData.token = response.msg
+      })
       const isJPG = file.type === 'image/jpeg'
       const isLt2M = file.size / 1024 / 1024 < 2
 

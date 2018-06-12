@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getToken } from '@/api/qiniu'
+import { getToken, delFile } from '@/api/qiniu'
 export default {
   name: 'editorSlideUpload',
   props: {
@@ -54,6 +54,7 @@ export default {
         return
       }
       console.log(arr)
+      console.log(this.fileList)
       this.$emit('successCBK', arr)
       this.listObj = {}
       this.fileList = []
@@ -75,6 +76,11 @@ export default {
     },
     handleRemove(file) {
       console.log('handleRemove')
+      console.log(file.response.key)
+      // 将key值传给七牛云，删除七牛云上的照片
+      delFile(file.response.key).then(response => {
+        console.log(response)
+      })
       const uid = file.uid
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {

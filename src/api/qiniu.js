@@ -6,9 +6,12 @@ export function getToken() {
     method: 'get'
   })
 }
-export function upload() {
+export function delFile(file) {
   return request({
-    url: '/adminNews/fileToken',
-    method: 'get'
+    url: '/adminNews/delFile',
+    method: 'post',
+    data: {
+      file
+    }
   })
 }
