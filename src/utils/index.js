@@ -56,3 +56,16 @@ export function formatTime(time, option) {
     return d.getMonth() + 1 + '月' + d.getDate() + '日' + d.getHours() + '时' + d.getMinutes() + '分'
   }
 }
+export function formatHTML(str) {
+  let arr = str.split('<body>')
+  str = ''
+  for (var i = 1; i < arr.length; i++) {
+    str += arr[i]
+  }
+  arr = str.split('</body>')
+  str = ''
+  for (var j = 0; j < arr.length - 1; j++) {
+    str += arr[j]
+  }
+  return str
+}

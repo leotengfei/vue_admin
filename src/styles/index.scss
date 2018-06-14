@@ -157,10 +157,13 @@ code {
     font-size: 20px;
     color: #fff;
   }
-  &.draft {
+  &.state0 {
     background: #d0d0d0;
   }
-  &.deleted {
+  &.state1 {
+    background: #d0d0d0;
+  }
+  &.state3 {
     background: #d0d0d0;
   }
 }
