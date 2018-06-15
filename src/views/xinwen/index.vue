@@ -242,7 +242,7 @@ export default {
       const statusMap = {
         unview: '未审核',
         published: '发表',
-        draft: '暂存',
+        draft: '草稿',
         deleted: '删除'
       }
       return statusMap[status]

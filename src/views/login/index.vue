@@ -24,7 +24,7 @@
       </el-form-item>
       <div class="tips">
         <span style="margin-right:20px;">username: jack</span>
-        <span> password:</span>
+        <span> password: myrose</span>
       </div>
     </el-form>
   </div>
@@ -53,7 +53,7 @@ export default {
     return {
       loginForm: {
         username: 'jack',
-        password: ''
+        password: 'myrose'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],

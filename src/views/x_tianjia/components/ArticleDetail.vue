@@ -1,6 +1,6 @@
 <template>
   <div class="createPost-container">
-    <el-form class="form-container" :model="postForm" :rules="rules" ref="postForm">
+    <el-form class="form-container" label-position="left" :model="postForm" :rules="rules" ref="postForm">
 
       <sticky :className="'sub-navbar state'+postForm.status">
         <template v-if="fetchSuccess">
@@ -134,7 +134,7 @@ import Sticky from '@/components/Sticky' // 粘性header组件
 import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 import { getToken, delFile } from '@/api/qiniu'
-import { addOneNews } from '@/api/artical' // 提交文章
+import { addOneNews, draftNews } from '@/api/artical' // 提交文章
 import { formatHTML } from '@/utils/index' // 获取富文本编辑器body中的内容
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
@@ -288,6 +288,7 @@ export default {
     submitForm() {
       // console.log(this.postForm)
       const that = this
+      this.postForm.status = 2
       let str = this.postForm.content
       str = formatHTML(str) // 去body中的文本
       console.log(str)
@@ -306,6 +307,7 @@ export default {
       }, error => {
         console.log(error)
         that.loading = false
+        this.postForm.status = 0
         that.$notify({
           title: '失败',
           message: '发布文章失败，请检查信息是否填写完整！',
@@ -333,21 +335,41 @@ export default {
       // })
     },
     draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
+      if (this.postForm.title.length === 0) {
         this.$message({
-          message: '请填写必要的标题和内容',
+          message: '请填写必要的标题',
           type: 'warning'
         })
         return
       }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
+      const that = this
+      this.postForm.status = 1 // 视频草稿状态
+      let str = this.postForm.content
+      str = formatHTML(str) // 去body中的文本
+      console.log(str)
+      this.loading = true
+      draftNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+        console.log(response)
+        if (response.code === 200) {
+          that.loading = false
+          that.$notify({
+            title: '成功',
+            message: '文章保存为草稿成功',
+            type: 'success',
+            duration: 2000
+          })
+        }
+      }, error => {
+        console.log(error)
+        that.loading = false
+        this.postForm.status = 0
+        that.$notify({
+          title: '失败',
+          message: '文章保存为草稿失败，请检查是否填写标题！',
+          type: 'warning',
+          duration: 2000
+        })
       })
-      this.postForm.status = 1
-      // 状态改为草稿状态
     }
   }
 }
