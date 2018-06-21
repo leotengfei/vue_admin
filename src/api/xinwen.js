@@ -20,3 +20,33 @@ export function getNewsContent(nid) {
     }
   })
 }
+
+export function audit(id) {
+  return request({
+    url: '/adminNews/audit',
+    method: 'post',
+    data: {
+      nid: id
+    }
+  })
+}
+
+export function draftNews(id) {
+  return request({
+    url: '/adminNews/draftNews',
+    method: 'post',
+    data: {
+      nid: id
+    }
+  })
+}
+
+export function delNews(id) {
+  return request({
+    url: '/adminNews/delNews',
+    method: 'post',
+    data: {
+      nid: id
+    }
+  })
+}

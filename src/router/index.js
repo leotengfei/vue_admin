@@ -118,7 +118,7 @@ export const constantRouterMap = [
         meta: { title: '添加新闻页', icon: 'xinwen' }
       },
       {
-        path: 'x_bianji',
+        path: 'x_bianji/:id',
         name: 'X_bianji',
         hidden: true,
         component: () => import('@/views/x_tianjia/edit.vue'),

@@ -18,11 +18,12 @@ export function addOneNews(status, title, content, image, time, weight, name, so
   })
 }
 
-export function draftNews(status, title, content, image, time, weight, name, source, classify) {
+export function editNewsData(nid, status, title, content, image, time, weight, name, source, classify) {
   return request({
-    url: '/adminNews/draft',
+    url: '/adminNews/editNewsData',
     method: 'post',
     data: {
+      nid,
       status,
       title,
       content,
@@ -35,3 +36,32 @@ export function draftNews(status, title, content, image, time, weight, name, sou
     }
   })
 }
+export function draftNews(nid, status, title, content, image, time, weight, name, source, classify) {
+  return request({
+    url: '/adminNews/draft',
+    method: 'post',
+    data: {
+      nid,
+      status,
+      title,
+      content,
+      image,
+      time,
+      weight,
+      name,
+      source,
+      classify
+    }
+  })
+}
+
+export function editNews(id) {
+  return request({
+    url: '/adminNews/editNews',
+    method: 'post',
+    data: {
+      nid: id
+    }
+  })
+}
+

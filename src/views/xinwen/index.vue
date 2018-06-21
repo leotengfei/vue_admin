@@ -17,7 +17,9 @@
         </el-option>
     </el-select>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search">搜索</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" v-waves icon="el-icon-edit">添加</el-button>
+      <router-link to="/xinwen/x_tianjia">
+        <el-button class="filter-item" style="margin-left: 10px;" type="primary" v-waves icon="el-icon-edit">添加</el-button>
+      </router-link>
       <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download">导出</el-button>
       <el-checkbox class="filter-item" style='margin-left:15px;'>已审核</el-checkbox>
     </div>
@@ -37,7 +39,7 @@
       <el-table-column min-width="100px" label="标题">
         <template slot-scope="scope">
           <span class="link-type" @click="handleViewContent(scope.row.id)">{{scope.row.title}}</span>
-          <el-tag>{{scope.row.type | typeFilter}}</el-tag>
+          <el-tag>{{scope.row.classify}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column min-width="50px" label="等级">
@@ -65,10 +67,10 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini">编辑</el-button>
-          <el-button size="mini" type="success">发布</el-button>
-          <!-- <el-button size="mini">草稿</el-button> -->
-          <el-button size="mini" type="danger">删除</el-button>
+          <el-button type="primary" size="mini" @click="toBianji(scope.row.id)">编辑</el-button>
+          <el-button size="mini" type="success" v-if="showfabu(scope.row.status)" @click="handleFabu(scope.row.id)">发布</el-button>
+          <el-button size="mini" type="info" v-if="scope.row.status !== 1" @click="handleCaogao(scope.row.id)">草稿</el-button>
+          <el-button size="mini" type="danger" v-if="scope.row.status !== 3" @click="handleDel(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -102,7 +104,7 @@
 </template>
 
 <script>
-import { getList, getNewsContent } from '@/api/xinwen'
+import { getList, getNewsContent, audit, delNews, draftNews } from '@/api/xinwen'
 import waves from '@/directive/waves' // 水波纹指令
 import nopic from '@/assets/nopic.jpg'
 
@@ -137,7 +139,7 @@ export default {
           title: '这是第一条新闻标题',
           weight: 4,
           type: 'POL',
-          status: 'unview',
+          status: '0',
           name: ['高考', '政策', '数学']
         }
       ],
@@ -181,6 +183,92 @@ export default {
     }
   },
   methods: {
+    handleFabu(nid) {
+      audit(nid).then(response => {
+        // 发布文章
+        this.fetchData(this.pageSize, this.currentPage)
+        this.$notify({
+          title: '成功',
+          message: '发布文章成功！',
+          type: 'success',
+          duration: 2000
+        })
+      }, error => {
+        console.log(error)
+        this.$notify({
+          title: '失败',
+          message: '请完成填写文章内容！',
+          type: 'warning',
+          duration: 2000
+        })
+      })
+    },
+    handleCaogao(nid) {
+      // 草稿状态
+      draftNews(nid).then(response => {
+        this.fetchData(this.pageSize, this.currentPage)
+        this.$notify({
+          title: '成功',
+          message: '修改为草稿状态成功！',
+          type: 'success',
+          duration: 2000
+        })
+      }, error => {
+        console.log(error)
+        this.$notify({
+          title: '失败',
+          message: '修改为草稿状态失败！',
+          type: 'warning',
+          duration: 2000
+        })
+      })
+    },
+    handleDel(nid) {
+      // 删除按钮
+      this.$confirm('此操作将会删除该条新闻，是否继续？', '提示', {
+        confirmButtonText: '确定',
+        cancleButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delNews(nid).then(response => {
+          this.fetchData(this.pageSize, this.currentPage)
+          this.$notify({
+            title: '成功',
+            message: '删除文章成功！',
+            type: 'success',
+            duration: 2000
+          })
+        }, error => {
+          console.log(error)
+          this.$notify({
+            title: '失败',
+            message: '删除文章失败！',
+            type: 'warning',
+            duration: 2000
+          })
+        })
+      }).catch(() => {
+        this.$notify({
+          title: '取消',
+          message: '已取消删除！',
+          type: 'success',
+          duration: 2000
+        })
+      })
+    },
+    toBianji(id) {
+      this.$router.push('/xinwen/x_bianji/' + id)
+    },
+    showfabu(status) {
+      // 显示发布按钮的情况
+      if (status === 0) {
+        return false
+      } else if (status === 2) {
+        return false
+      } else {
+        return true
+      }
+    },
     handleSizeChange(val) {
       this.listLoading = true
       // console.log(`每页 ${val} 条`) 改变分页大小
@@ -231,20 +319,15 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        unview: 'info',
-        published: 'success',
-        draft: 'default',
-        deleted: 'danger'
+        0: 'info',
+        1: 'success',
+        2: 'default',
+        3: 'danger'
       }
       return statusMap[status]
     },
     statusReFilter(status) {
-      const statusMap = {
-        unview: '未审核',
-        published: '发表',
-        draft: '草稿',
-        deleted: '删除'
-      }
+      const statusMap = ['未审核', '草稿', '已发布', '删除']
       return statusMap[status]
     },
     typeFilter(type) {

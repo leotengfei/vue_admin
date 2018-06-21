@@ -1,11 +1,11 @@
 <template>
   <div class="createPost-container">
-    <el-form class="form-container" label-position="left" :model="postForm" :rules="rules" ref="postForm">
+    <el-form class="form-container" label-position="left" :model="postForm" :rules="rules" ref="postForm" v-loading='pageDataLoading' element-loading-text="拼命加载中">
 
       <sticky :className="'sub-navbar state'+postForm.status">
         <template v-if="fetchSuccess">
 
-          <router-link style="margin-right:15px;" v-show='isEdit' :to="{ path:'x_tianjia'}">
+          <router-link style="margin-right:15px;" v-show='isEdit' to="/xinwen/x_tianjia">
             <el-button type="info">添加新闻</el-button>
           </router-link>
 
@@ -102,7 +102,14 @@
             :typeahead="true"></tags-input>
         </el-form-item>
         <div style="margin-bottom: 20px;">
-          <el-upload
+        <el-row>
+          <el-col :span="8" v-if="isEdit&&!isClickedUpload">
+            <div>
+            <img :src="postForm.image" style="width:150px;height:150px;" alt="">
+          </div>
+          </el-col>
+          <el-col :span="8">
+              <el-upload
             action="http://up-z1.qiniup.com"
             :multiple="false"
             :limit=1
@@ -117,6 +124,8 @@
           <el-dialog :visible.sync="dialogVisible">
             <img width="100%" :src="dialogImageUrl" alt="">
           </el-dialog>
+          </el-col>
+        </el-row>
         </div>
         <div class="editor-container">
           <tinymce :height=400 ref="editor" v-model="postForm.content"></tinymce>
@@ -134,7 +143,7 @@ import Sticky from '@/components/Sticky' // 粘性header组件
 import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 import { getToken, delFile } from '@/api/qiniu'
-import { addOneNews, draftNews } from '@/api/artical' // 提交文章
+import { addOneNews, draftNews, editNews, editNewsData } from '@/api/artical' // 提交文章
 import { formatHTML } from '@/utils/index' // 获取富文本编辑器body中的内容
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
@@ -163,6 +172,8 @@ export default {
   },
   data() {
     return {
+      pageDataLoading: false,
+      isClickedUpload: false,
       postForm: Object.assign({}, defaultForm),
       options: [{
         value: '教育',
@@ -179,7 +190,6 @@ export default {
       dialogVisible: false,
       fetchSuccess: true,
       loading: false,
-      userLIstOptions: [],
       rules: {
       },
       selectedTags: [],
@@ -195,6 +205,9 @@ export default {
   },
   created() {
     if (this.isEdit) {
+      // 编辑新闻页面进来后
+      console.log(this.$route.params.id)
+      this.pageDataLoading = true
       this.fetchData()
     } else {
       this.postForm = Object.assign({}, defaultForm)
@@ -203,6 +216,13 @@ export default {
   methods: {
     fetchData() {
       console.log('请求数据')
+      const nid = this.$route.params.id
+      editNews(nid).then(response => {
+        console.log(response)
+        this.postForm = response
+        this.pageDataLoading = false
+        console.log(this.postForm)
+      })
     },
     handleRemove(file, fileList) {
       console.log(file, fileList)
@@ -239,11 +259,9 @@ export default {
       this.dialogVisible = true
     },
     handleAvatarSuccess(res, file) {
-      // console.log(res)
-      // console.log('---')
-      // console.log(file)
       if (file.status === 'success') {
         this.postForm.image = 'http://p9mwnc6fh.bkt.clouddn.com/' + res.key
+        this.isClickedUpload = true
         this.$notify({
           title: '成功',
           message: '上传图片成功',
@@ -258,7 +276,7 @@ export default {
       const fileName = file.uid
       const isJPG = file.type === 'image/jpeg'
       const isLt2M = file.size / 1024 / 1024 < 2
-      console.log(!isJPG)
+      // console.log(!isJPG)
       if (isJPG && isLt2M) {
         this.listObj[fileName] = {}
         return new Promise((resolve, reject) => {
@@ -293,28 +311,56 @@ export default {
       str = formatHTML(str) // 去body中的文本
       console.log(str)
       this.loading = true
-      addOneNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
-        console.log(response)
-        if (response.code === 200) {
+      if (this.isEdit) {
+        // 编辑新闻路由下提交
+        const nid = this.$route.params.id
+        editNewsData(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+          console.log(response)
+          if (response.code === 200) {
+            that.loading = false
+            that.$notify({
+              title: '成功',
+              message: '发布文章成功',
+              type: 'success',
+              duration: 2000
+            })
+          }
+        }, error => {
+          console.log(error)
           that.loading = false
+          this.postForm.status = 0
           that.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
+            title: '失败',
+            message: '发布文章失败，请检查信息是否填写完整！',
+            type: 'warning',
             duration: 2000
           })
-        }
-      }, error => {
-        console.log(error)
-        that.loading = false
-        this.postForm.status = 0
-        that.$notify({
-          title: '失败',
-          message: '发布文章失败，请检查信息是否填写完整！',
-          type: 'warning',
-          duration: 2000
         })
-      })
+      } else {
+        // 添加新闻路由下提交
+        addOneNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+          console.log(response)
+          if (response.code === 200) {
+            that.loading = false
+            that.$notify({
+              title: '成功',
+              message: '发布文章成功',
+              type: 'success',
+              duration: 2000
+            })
+          }
+        }, error => {
+          console.log(error)
+          that.loading = false
+          this.postForm.status = 0
+          that.$notify({
+            title: '失败',
+            message: '发布文章失败，请检查信息是否填写完整！',
+            type: 'warning',
+            duration: 2000
+          })
+        })
+      }
 
       // this.$refs.postForm.validate(valid => {
       //   if (valid) {
@@ -343,12 +389,19 @@ export default {
         return
       }
       const that = this
-      this.postForm.status = 1 // 视频草稿状态
+      this.postForm.status = 1 // 保存为草稿状态
       let str = this.postForm.content
       str = formatHTML(str) // 去body中的文本
       console.log(str)
       this.loading = true
-      draftNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+      let nid = ''
+      console.log(this.isEdit)
+      if (this.isEdit) {
+        // 编辑路由下存为草稿
+        nid = this.$route.params.id
+      }
+      // 编辑新闻路由下
+      draftNews(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
         console.log(response)
         if (response.code === 200) {
           that.loading = false
