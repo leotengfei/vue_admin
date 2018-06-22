@@ -172,6 +172,10 @@ export default {
   },
   data() {
     return {
+      view: {
+        path: this.$route.path,
+        name: this.$route.name
+      },
       pageDataLoading: false,
       isClickedUpload: false,
       postForm: Object.assign({}, defaultForm),
@@ -304,7 +308,7 @@ export default {
       }
     },
     submitForm() {
-      // console.log(this.postForm)
+      console.log(this.postForm)
       const that = this
       this.postForm.status = 2
       let str = this.postForm.content
@@ -320,10 +324,20 @@ export default {
             that.loading = false
             that.$notify({
               title: '成功',
-              message: '发布文章成功',
+              message: '发布文章成功,1s后跳转',
               type: 'success',
               duration: 2000
             })
+            setTimeout(() => {
+              that.$store.dispatch('delVisitedViews', that.view).then((views) => {
+                const latestView = views.slice(-1)[0]
+                if (latestView) {
+                  that.$router.push(latestView.path)
+                } else {
+                  that.$router.push('/')
+                }
+              })
+            }, 1000)
           }
         }, error => {
           console.log(error)
@@ -348,6 +362,16 @@ export default {
               type: 'success',
               duration: 2000
             })
+            setTimeout(() => {
+              that.$store.dispatch('delVisitedViews', that.view).then((views) => {
+                const latestView = views.slice(-1)[0]
+                if (latestView) {
+                  that.$router.push(latestView.path)
+                } else {
+                  that.$router.push('/')
+                }
+              })
+            }, 2000)
           }
         }, error => {
           console.log(error)
