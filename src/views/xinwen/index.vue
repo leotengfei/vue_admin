@@ -188,7 +188,7 @@ export default {
     handleFabu(nid) {
       audit(nid).then(response => {
         // 发布文章
-        this.fetchData(this.pageSize, this.currentPage)
+        this.fetchData(this.page.pageSize, this.page.currentPage)
         this.$notify({
           title: '成功',
           message: '发布文章成功！',
@@ -208,7 +208,7 @@ export default {
     handleCaogao(nid) {
       // 草稿状态
       draftNews(nid).then(response => {
-        this.fetchData(this.pageSize, this.currentPage)
+        this.fetchData(this.page.pageSize, this.page.currentPage)
         this.$notify({
           title: '成功',
           message: '修改为草稿状态成功！',
@@ -233,7 +233,7 @@ export default {
         type: 'warning'
       }).then(() => {
         delNews(nid).then(response => {
-          this.fetchData(this.pageSize, this.currentPage)
+          this.fetchData(this.page.pageSize, this.page.currentPage)
           this.$notify({
             title: '成功',
             message: '删除文章成功！',
