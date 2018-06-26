@@ -81,9 +81,9 @@
       background
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page="page.currentPage"
       :page-sizes="[10, 20, 30, 40]"
-      :page-size="pageSize"
+      :page-size="page.pageSize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
@@ -128,8 +128,10 @@ export default {
       centerDialogVisible: false,
       dialogLoading: false,
       centerDialogContent: '',
-      currentPage: 1,
-      pageSize: 10,
+      page: {
+        currentPage: 1,
+        pageSize: 10
+      },
       total: 10,
       tableKey: 0,
       list: [
@@ -270,16 +272,28 @@ export default {
       }
     },
     handleSizeChange(val) {
+      const that = this
       this.listLoading = true
       // console.log(`每页 ${val} 条`) 改变分页大小
-      this.pageSize = val
-      this.fetchData(this.pageSize, this.currentPage)
+      this.page.pageSize = val
+      this.$store.dispatch('GetPage', that.page).then(() => {
+        console.log('更新分页大小成功')
+        that.fetchData(that.page.pageSize, that.page.currentPage)
+      }).catch(() => {
+        console.log('更新分页大小失败')
+      })
     },
     handleCurrentChange(val) {
-      // console.log(`当前页: ${val}`) 分页改变当前页
+      console.log(`当前页: ${val}`) // 分页改变当前页
+      const that = this
       this.listLoading = true
-      this.currentPage = val
-      this.fetchData(this.pageSize, this.currentPage)
+      this.page.currentPage = val
+      this.$store.dispatch('GetPage', that.page).then(() => {
+        console.log('更新页码成功')
+        that.fetchData(that.page.pageSize, that.page.currentPage)
+      }).catch(() => {
+        console.log('更新页码失败')
+      })
     },
     fetchData(pageSize, currentPage) {
       // 加载数据
@@ -314,7 +328,9 @@ export default {
   },
   created() {
     this.listLoading = true
-    this.fetchData(this.pageSize, this.currentPage)
+    this.fetchData(this.$store.getters.pageSize, this.$store.getters.currentPage)
+    this.page.pageSize = this.$store.getters.pageSize
+    this.page.currentPage = this.$store.getters.currentPage
   },
   filters: {
     statusFilter(status) {
