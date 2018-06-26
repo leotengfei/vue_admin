@@ -223,6 +223,8 @@ export default {
       const nid = this.$route.params.id
       editNews(nid).then(response => {
         console.log(response)
+        // 防止工具函数formatHTML抓body中的内容为空
+        response.content = '<!DOCTYPE html><html><head></head><body>' + response.content + '</body></html>'
         this.postForm = response
         this.pageDataLoading = false
         console.log(this.postForm)
@@ -312,6 +314,7 @@ export default {
       const that = this
       this.postForm.status = 2
       let str = this.postForm.content
+      console.log(str)
       str = formatHTML(str) // 去body中的文本
       console.log(str)
       this.loading = true
