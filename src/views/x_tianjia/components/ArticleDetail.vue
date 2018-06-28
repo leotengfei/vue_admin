@@ -324,9 +324,17 @@ export default {
       const that = this
       this.postForm.status = 2
       let str = this.postForm.content
-      console.log(str)
       str = formatHTML(str) // 去body中的文本
-      console.log(str)
+      const imgReg = /<img.*?(?:>|\/>)/gi
+      // 匹配src属性
+      const srcReg = /src\s*=\s*[\'\"]?([^\'\"]*)[\'\"]?/i
+      const arr = str.match(imgReg)
+      var srcArr = []
+      for (var i = 0; i < arr.length; i++) {
+        srcArr[i] = arr[i].match(srcReg)[1]
+        // 获取图片地址
+      }
+      console.log(srcArr)
       this.loading = true
       if (this.isEdit) {
         // 编辑新闻路由下提交
