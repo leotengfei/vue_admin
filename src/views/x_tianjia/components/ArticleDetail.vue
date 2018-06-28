@@ -198,7 +198,8 @@ export default {
       },
       selectedTags: [],
       postData: {
-        token: ''
+        token: '',
+        key: ''
       }
     }
   },
@@ -277,6 +278,14 @@ export default {
       }
     },
     beforeAvatarUpload(file) {
+      // 为文件名加上 时间戳+随机四位 防止文件名相同
+      const rName = function() {
+        return new Date().getTime()
+      }
+      const zimu = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+      const rNum = function() {
+        return Math.floor(Math.random() * 25)
+      }
       const _self = this
       const _URL = window.URL || window.webkitURL
       const fileName = file.uid
@@ -294,6 +303,7 @@ export default {
           getToken().then(response => {
           // console.log(response)
             _self.postData.token = response.msg
+            _self.postData.key = rName() + zimu[rNum()] + zimu[rNum()] + zimu[rNum()] + zimu[rNum()] + file.name
             resolve(true)
           })
         })
@@ -333,12 +343,7 @@ export default {
             })
             setTimeout(() => {
               that.$store.dispatch('delVisitedViews', that.view).then((views) => {
-                const latestView = views.slice(-1)[0]
-                if (latestView) {
-                  that.$router.push(latestView.path)
-                } else {
-                  that.$router.push('/')
-                }
+                that.$router.push('/xinwen/x_guanli')
               })
             }, 1000)
           }
@@ -367,12 +372,7 @@ export default {
             })
             setTimeout(() => {
               that.$store.dispatch('delVisitedViews', that.view).then((views) => {
-                const latestView = views.slice(-1)[0]
-                if (latestView) {
-                  that.$router.push(latestView.path)
-                } else {
-                  that.$router.push('/')
-                }
+                that.$router.push('/xinwen/x_guanli')
               })
             }, 2000)
           }

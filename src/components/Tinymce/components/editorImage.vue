@@ -38,7 +38,8 @@ export default {
       listObj: {},
       fileList: [],
       postData: {
-        token: ''
+        token: '',
+        key: ''
       }
     }
   },
@@ -91,8 +92,14 @@ export default {
       }
     },
     beforeUpload(file) {
-      console.log('beforeUpload')
-      console.log(file)
+      // 为文件名加上 时间戳+随机四位 防止文件名相同
+      const rName = function() {
+        return new Date().getTime()
+      }
+      const zimu = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+      const rNum = function() {
+        return Math.floor(Math.random() * 25)
+      }
       const _self = this
       const _URL = window.URL || window.webkitURL
       const fileName = file.uid
@@ -106,6 +113,8 @@ export default {
         getToken().then(response => {
           // console.log(response)
           this.postData.token = response.msg
+          this.postData.key = rName() + zimu[rNum()] + zimu[rNum()] + zimu[rNum()] + zimu[rNum()] + file.name
+          console.log(this.postData.key)
           resolve(true)
         })
       })
