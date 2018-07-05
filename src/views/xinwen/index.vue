@@ -6,22 +6,27 @@
       </el-input>
       <el-date-picker
       class="filter-item"
-      v-model="listQuery.nDate"
+      v-model="listQuery.time"
       align="right"
       type="date"
       placeholder="选择日期"
+      format="yyyy-MM-dd" 
+      value-format="yyyy-MM-dd"
       :picker-options="pickerOptions1">
     </el-date-picker>
-    <el-select clearable class="filter-item" style="width: 130px" v-model="listQuery.type" placeholder="分类">
-        <el-option v-for="item in  fenleiTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key">
+    <el-select clearable class="filter-item" style="width: 130px" v-model="listQuery.classify" placeholder="分类">
+        <el-option v-for="item in  fenleiTypeOptions" :key="item.key" :label="item.display_name" :value="item.display_name">
         </el-option>
     </el-select>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-search">搜索</el-button>
+    <el-select clearable class="filter-item" style="width: 130px" v-model="listQuery.status" placeholder="状态">
+        <el-option v-for="item in  statusTypeOptions" :key="item.key" :label="item.display_name" :value="item.key">
+        </el-option>
+    </el-select>
+    <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" style='margin-left:15px;' @click="handleSearch">搜索</el-button>
       <router-link to="/xinwen/x_tianjia">
-        <el-button class="filter-item" style="margin-left: 10px;" type="primary" v-waves icon="el-icon-edit">添加</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-edit">添加</el-button>
       </router-link>
-      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download">导出</el-button>
-      <el-checkbox class="filter-item" style='margin-left:15px;'>已审核</el-checkbox>
+      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download"  @click="handleExport">导出</el-button>
     </div>
     <!-- 表格内容区域 -->
     <el-table :key='tableKey' :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
@@ -36,7 +41,7 @@
           <span>{{scope.row.time}}</span>
         </template>
       </el-table-column>
-      <el-table-column min-width="100px" label="标题">
+      <el-table-column min-width="100px" label="标题（分类）">
         <template slot-scope="scope">
           <span class="link-type" @click="handleViewContent(scope.row.id)">{{scope.row.title}}</span>
           <el-tag>{{scope.row.classify}}</el-tag>
@@ -107,17 +112,20 @@
 import { getList, getNewsContent, audit, delNews, draftNews } from '@/api/xinwen'
 import waves from '@/directive/waves' // 水波纹指令
 import nopic from '@/assets/nopic.jpg'
+import axios from 'axios'
 
 const fenleiTypeOptions = [
-  { key: 'POL', display_name: '政策' },
-  { key: 'EXA', display_name: '考试' },
-  { key: 'FUN', display_name: '娱乐' }
+  { key: 'POL', display_name: '政策法规' },
+  { key: 'EXA', display_name: '升学考试' },
+  { key: 'EDU', display_name: '亲子教育' },
+  { key: 'FUN', display_name: '轻松一刻' }
 ]
 
-const fenleiTypeKeyValue = fenleiTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
+const statusTypeOptions = [
+  { key: 2, display_name: '已发布' },
+  { key: 3, display_name: '已删除' },
+  { key: 1, display_name: '草稿' }
+]
 
 export default {
   directives: {
@@ -147,11 +155,13 @@ export default {
       ],
       listQuery: {
         title: '',
-        nDate: '',
-        type: ''
+        time: '',
+        classify: '',
+        status: ''
       },
       downloadLoading: false,
       fenleiTypeOptions: fenleiTypeOptions,
+      statusTypeOptions: statusTypeOptions,
       pickerOptions1: {
         disabledDate(time) {
           return time.getTime() > Date.now()
@@ -185,6 +195,54 @@ export default {
     }
   },
   methods: {
+    handleSearch() {
+      console.log('搜索')
+      console.log(this.listQuery)
+      this.listLoading = true
+      this.fetchData(this.$store.getters.pageSize, 1)
+      this.page.pageSize = this.$store.getters.pageSize
+      this.page.currentPage = 1
+    },
+    handleExport() {
+      // const aTag = document.createElement('a')
+      // aTag.href = 'https://mokey.club/adminNews/exportNews'
+      // aTag.click()
+      console.log('导出表格')
+      axios({
+        method: 'post',
+        url: 'https://mokey.club/adminNews/exportNews',
+        data: {
+        },
+        responseType: 'blob'
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response]))
+        console.log(url)
+        const link = document.createElement('a')
+        link.style.display = 'none'
+        link.href = url
+        link.setAttribute('download', 'excel.xlsx')
+
+        document.body.appendChild(link)
+        link.click()
+      }).catch((error) => {
+        console.log(error)
+      })
+
+      // exportExcel().then(response => {
+      //   console.log(response)
+      //   const url = window.URL.createObjectURL(new Blob([response]))
+      //   console.log(url)
+      //   const link = document.createElement('a')
+      //   link.style.display = 'none'
+      //   link.href = url
+      //   link.setAttribute('download', 'excel.xlsx')
+
+      //   document.body.appendChild(link)
+      //   link.click()
+      // }).catch(error => {
+      //   console.log(error)
+      // })
+    },
     handleFabu(nid) {
       audit(nid).then(response => {
         // 发布文章
@@ -297,13 +355,20 @@ export default {
     },
     fetchData(pageSize, currentPage) {
       // 加载数据
-      getList(pageSize, currentPage).then(response => {
+      getList(pageSize, currentPage, this.listQuery.title, this.listQuery.time, this.listQuery.classify, this.listQuery.status).then(response => {
         // console.log(response.data)
         this.listLoading = false
         this.list = response.data
         this.total = response.count
       }).catch(err => {
         this.fetchSuccess = false
+        this.listLoading = false
+        this.$notify({
+          title: '失败',
+          message: '搜索内容失败，请改变条件或联系程序员！',
+          type: 'error',
+          duration: 3000
+        })
         console.log(err)
       })
     },
@@ -343,11 +408,8 @@ export default {
       return statusMap[status]
     },
     statusReFilter(status) {
-      const statusMap = ['未审核', '草稿', '已发布', '删除']
+      const statusMap = ['未审核', '草稿', '已发布', '已删除']
       return statusMap[status]
-    },
-    typeFilter(type) {
-      return fenleiTypeKeyValue[type]
     }
   }
 }

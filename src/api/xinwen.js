@@ -1,12 +1,16 @@
 import request from '@/utils/request'
 
-export function getList(list_rows, list) {
+export function getList(list_rows, list, title, time, classify, status) {
   return request({
     url: '/adminNews/getNewsData',
     method: 'post',
     data: {
       list_rows: list_rows,
-      list: list
+      list: list,
+      title: title,
+      time: time,
+      classify: classify,
+      status: status
     }
   })
 }
@@ -48,5 +52,13 @@ export function delNews(id) {
     data: {
       nid: id
     }
+  })
+}
+
+export function exportExcel() {
+  return request({
+    url: '/adminNews/exportNews',
+    method: 'post',
+    responseType: 'blob'
   })
 }
