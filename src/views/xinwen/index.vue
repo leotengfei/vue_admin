@@ -109,10 +109,9 @@
 </template>
 
 <script>
-import { getList, getNewsContent, audit, delNews, draftNews } from '@/api/xinwen'
+import { getList, getNewsContent, audit, delNews, draftNews, exportExcel } from '@/api/xinwen'
 import waves from '@/directive/waves' // 水波纹指令
 import nopic from '@/assets/nopic.jpg'
-import axios from 'axios'
 
 const fenleiTypeOptions = [
   { key: 'POL', display_name: '政策法规' },
@@ -204,44 +203,41 @@ export default {
       this.page.currentPage = 1
     },
     handleExport() {
-      // const aTag = document.createElement('a')
-      // aTag.href = 'https://mokey.club/adminNews/exportNews'
-      // aTag.click()
-      console.log('导出表格')
-      axios({
-        method: 'post',
-        url: 'https://mokey.club/adminNews/exportNews',
-        data: {
-        },
-        responseType: 'blob'
-      }).then(response => {
-        const url = window.URL.createObjectURL(new Blob([response]))
-        console.log(url)
-        const link = document.createElement('a')
-        link.style.display = 'none'
-        link.href = url
-        link.setAttribute('download', 'excel.xlsx')
-
-        document.body.appendChild(link)
-        link.click()
-      }).catch((error) => {
-        console.log(error)
+      this.$notify({
+        title: '成功',
+        message: '正在导出表格，请耐心等待！',
+        type: 'success',
+        duration: 2000
       })
-
-      // exportExcel().then(response => {
-      //   console.log(response)
-      //   const url = window.URL.createObjectURL(new Blob([response]))
-      //   console.log(url)
-      //   const link = document.createElement('a')
-      //   link.style.display = 'none'
-      //   link.href = url
-      //   link.setAttribute('download', 'excel.xlsx')
-
-      //   document.body.appendChild(link)
-      //   link.click()
-      // }).catch(error => {
-      //   console.log(error)
-      // })
+      const that = this
+      this.downloadLoading = true
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['title', 'time', 'classify', 'name', 'weight', 'status', 'content']
+        exportExcel(that.listQuery.title, that.listQuery.time, that.listQuery.classify, that.listQuery.status).then(response => {
+          const arr = response.data
+          for (var i = 0; i < arr.length; i++) {
+            arr[i] = [arr[i].title, arr[i].time, arr[i].classify, arr[i].name, arr[i].weight, arr[i].status, arr[i].content]
+          }
+          const data = arr
+          console.log(data)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '导出数据',
+            autoWidth: false
+          })
+          this.downloadLoading = false
+        }, error => {
+          console.log(error)
+          this.$notify({
+            title: '失败',
+            message: '导出表格失败，请检查筛选条件',
+            type: 'error',
+            duration: 2000
+          })
+          this.downloadLoading = false
+        })
+      })
     },
     handleFabu(nid) {
       audit(nid).then(response => {

@@ -55,10 +55,15 @@ export function delNews(id) {
   })
 }
 
-export function exportExcel() {
+export function exportExcel(title, time, classify, status) {
   return request({
     url: '/adminNews/exportNews',
     method: 'post',
-    responseType: 'blob'
+    data: {
+      title: title,
+      time: time,
+      classify: classify,
+      status: status
+    }
   })
 }
