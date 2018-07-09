@@ -8,7 +8,11 @@ const getters = {
   roles: state => state.user.roles,
   errorLogs: state => state.errorLog.logs,
   currentPage: state => state.newslist.currentPage,
-  pageSize: state => state.newslist.pageSize
+  pageSize: state => state.newslist.pageSize,
+  title: state => state.newslist.title,
+  time: state => state.newslist.time,
+  classify: state => state.newslist.classify,
+  status: state => state.newslist.status
 
 }
 export default getters

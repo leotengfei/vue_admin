@@ -139,6 +139,12 @@ export default {
         currentPage: 1,
         pageSize: 10
       },
+      listQuery: {
+        title: '1',
+        time: '2',
+        classify: '3',
+        status: '4'
+      },
       total: 10,
       tableKey: 0,
       list: [
@@ -146,18 +152,12 @@ export default {
           id: 0,
           time: '2018/4/24',
           title: '这是第一条新闻标题',
-          weight: 4,
+          weight: 2500,
           type: 'POL',
           status: '0',
           name: ['高考', '政策', '数学']
         }
       ],
-      listQuery: {
-        title: '',
-        time: '',
-        classify: '',
-        status: ''
-      },
       downloadLoading: false,
       fenleiTypeOptions: fenleiTypeOptions,
       statusTypeOptions: statusTypeOptions,
@@ -195,8 +195,13 @@ export default {
   },
   methods: {
     handleSearch() {
-      console.log('搜索')
-      console.log(this.listQuery)
+      const that = this
+      this.$store.dispatch('GetQuery', that.listQuery).then(() => {
+        console.log('更新参数')
+        console.log(that.$store.getters)
+      }).catch(() => {
+        console.log('更新参数失败')
+      })
       this.listLoading = true
       this.fetchData(this.$store.getters.pageSize, 1)
       this.page.pageSize = this.$store.getters.pageSize
@@ -388,6 +393,10 @@ export default {
     }
   },
   created() {
+    this.listQuery.title = this.$store.getters.title
+    this.listQuery.time = this.$store.getters.time
+    this.listQuery.classify = this.$store.getters.classify
+    this.listQuery.status = this.$store.getters.status
     this.listLoading = true
     this.fetchData(this.$store.getters.pageSize, this.$store.getters.currentPage)
     this.page.pageSize = this.$store.getters.pageSize
