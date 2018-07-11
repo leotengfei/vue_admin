@@ -49,22 +49,24 @@ export default {
     },
     handleSubmit() {
       console.log('handleSubmit')
+      console.log(this.listObj)
+      console.log(this.fileList)
       const arr = Object.keys(this.listObj).map(v => this.listObj[v])
+      console.log(arr)
       if (!this.checkAllSuccess()) {
         this.$message('请等待所有图片上传成功 或 出现了网络问题，请刷新页面重新上传！')
         return
       }
       console.log(arr)
-      console.log(this.fileList)
       this.$emit('successCBK', arr)
       this.listObj = {}
       this.fileList = []
       this.dialogVisible = false
     },
-    handleSuccess(response, file) {
-      console.log(response)
+    handleSuccess(response, file, fileList) {
+      // console.log(response)
+      // console.log(fileList)
       console.log('handleSuccess')
-      console.log(file)
       const uid = file.uid
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
@@ -75,7 +77,7 @@ export default {
         }
       }
     },
-    handleRemove(file) {
+    handleRemove(file, fileList) {
       console.log('handleRemove')
       console.log(file.response.key)
       // 将key值传给七牛云，删除七牛云上的照片

@@ -2,7 +2,7 @@
   <div class="tinymce-container editor-container">
     <textarea class="tinymce-textarea" :id="tinymceId"></textarea>
     <div class="editor-custom-btn-container">
-      <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK"></editorImage>
+      <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" ref='editorImage'></editorImage>
     </div>
   </div>
 </template>
@@ -41,6 +41,7 @@ export default {
   },
   data() {
     return {
+      newUploadList: [],
       hasChange: false,
       hasInit: false,
       tinymceId: this.id || 'vue-tinymce-' + +new Date()
@@ -147,9 +148,16 @@ export default {
     },
     imageSuccessCBK(arr) {
       const _this = this
-      arr.forEach(v => {
-        window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`)
-      })
+      if (arr) {
+        arr.forEach(v => {
+          window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`)
+          // 取出图片上传组件的图片列表
+          _this.newUploadList.push(v.url)
+        })
+      } else {
+        _this.newUploadList = []
+      }
+      console.log(this.newUploadList)
     }
   },
   destroyed() {

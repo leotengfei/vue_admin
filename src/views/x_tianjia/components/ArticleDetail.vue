@@ -144,7 +144,7 @@ import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 import { getToken, delFile } from '@/api/qiniu'
 import { addOneNews, draftNews, editNews, editNewsData } from '@/api/artical' // 提交文章
-import { formatHTML } from '@/utils/index' // 获取富文本编辑器body中的内容
+import { formatHTML, getImgList, diffArr } from '@/utils/index' // 获取富文本编辑器body中的内容
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
 // import { userSearch } from '@/api/remoteSearch'
@@ -160,6 +160,9 @@ const defaultForm = {
   source: '原创', // 来源
   classify: '' // 分类
 }
+
+let oldImgList = []
+let newImgList = []
 
 export default {
   name: 'articleDetail',
@@ -180,14 +183,17 @@ export default {
       isClickedUpload: false,
       postForm: Object.assign({}, defaultForm),
       options: [{
-        value: '教育',
-        label: '教育'
+        value: '政策法规',
+        label: '政策法规'
       }, {
-        value: '政策',
-        label: '政策'
+        value: '升学考试',
+        label: '升学考试'
       }, {
-        value: '娱乐',
-        label: '娱乐'
+        value: '亲子教育',
+        label: '亲子教育'
+      }, {
+        value: '轻松一刻',
+        label: '轻松一刻'
       }],
       dialogImageUrl: '',
       listObj: {},
@@ -219,16 +225,41 @@ export default {
     }
   },
   methods: {
+    delImg() {
+      const that = this
+      console.log(that.$refs.editor.newUploadList)
+      console.log(oldImgList)
+      var oldTotalImg = that.$refs.editor.newUploadList.concat(oldImgList)
+      console.log(oldTotalImg)
+      newImgList = getImgList(that.postForm.content)
+      console.log(newImgList)
+      console.log(diffArr(oldTotalImg, newImgList))
+      var delImgList = diffArr(oldTotalImg, newImgList)
+      console.log(delImgList)
+      if (delImgList) {
+        for (var i = 0; i < delImgList.length; i++) {
+        // 将图片路径中的文件名取出来
+          delImgList[i] = delImgList[i].split('/')[delImgList[i].split('/').length - 1]
+          delFile(delImgList[i]).then(response => {
+            console.log(response)
+          })
+        }
+      }
+    },
     fetchData() {
       console.log('请求数据')
+      const that = this
       const nid = this.$route.params.id
       editNews(nid).then(response => {
         console.log(response)
         // 防止工具函数formatHTML抓body中的内容为空
         response.content = '<!DOCTYPE html><html><head></head><body>' + response.content + '</body></html>'
-        this.postForm = response
-        this.pageDataLoading = false
-        console.log(this.postForm)
+        that.postForm = response
+        // 获取原先文章中的图片，转换为数组
+        oldImgList = getImgList(that.postForm.content)
+        console.log(oldImgList)
+        that.pageDataLoading = false
+        console.log(that.postForm)
       })
     },
     handleRemove(file, fileList) {
@@ -320,21 +351,10 @@ export default {
       }
     },
     submitForm() {
-      console.log(this.postForm)
       const that = this
       this.postForm.status = 2
       let str = this.postForm.content
       str = formatHTML(str) // 去body中的文本
-      const imgReg = /<img.*?(?:>|\/>)/gi
-      // 匹配src属性
-      const srcReg = /src\s*=\s*[\'\"]?([^\'\"]*)[\'\"]?/i
-      const arr = str.match(imgReg)
-      var srcArr = []
-      for (var i = 0; i < arr.length; i++) {
-        srcArr[i] = arr[i].match(srcReg)[1]
-        // 获取图片地址
-      }
-      console.log(srcArr)
       this.loading = true
       if (this.isEdit) {
         // 编辑新闻路由下提交
@@ -343,6 +363,8 @@ export default {
           console.log(response)
           if (response.code === 200) {
             that.loading = false
+            // 检查是否删除了富文本编辑器中的文章，如果删除了，删除七牛云上的文件
+            that.delImg()
             that.$notify({
               title: '成功',
               message: '发布文章成功,1s后跳转',
@@ -372,6 +394,8 @@ export default {
           console.log(response)
           if (response.code === 200) {
             that.loading = false
+            // 检查是否删除了富文本编辑器中的文章，如果删除了，删除七牛云上的文件
+            that.delImg()
             that.$notify({
               title: '成功',
               message: '发布文章成功',
@@ -440,6 +464,8 @@ export default {
         console.log(response)
         if (response.code === 200) {
           that.loading = false
+          // 检查是否删除了富文本编辑器中的文章，如果删除了，删除七牛云上的文件
+          that.delImg()
           that.$notify({
             title: '成功',
             message: '文章保存为草稿成功',
