@@ -144,7 +144,7 @@ import tagsInput from '@voerro/vue-tagsinput'
 import '@voerro/vue-tagsinput/dist/style.css'// 多选框组件css
 import { getToken, delFile } from '@/api/qiniu'
 import { addOneNews, draftNews, editNews, editNewsData } from '@/api/artical' // 提交文章
-import { formatHTML, getImgList, diffArr } from '@/utils/index' // 获取富文本编辑器body中的内容
+import { formatHTML, getImgList, diffArr, star, toStar } from '@/utils/index' // 获取富文本编辑器body中的内容
 // import { validateURL } from '@/utils/validate'
 // import { fetchArticle } from '@/api/article'
 // import { userSearch } from '@/api/remoteSearch'
@@ -155,7 +155,7 @@ const defaultForm = {
   content: '', // 文章内容
   image: '', // 文章图片
   time: '', // 前台展示时间
-  weight: 1, // 文章等级
+  weight: 0, // 文章等级
   name: [], // 文章标签
   source: '原创', // 来源
   classify: '' // 分类
@@ -227,15 +227,15 @@ export default {
   methods: {
     delImg() {
       const that = this
-      console.log(that.$refs.editor.newUploadList)
-      console.log(oldImgList)
+      // console.log(that.$refs.editor.newUploadList)
+      // console.log(oldImgList)
       var oldTotalImg = that.$refs.editor.newUploadList.concat(oldImgList)
-      console.log(oldTotalImg)
+      // console.log(oldTotalImg)
       newImgList = getImgList(that.postForm.content)
-      console.log(newImgList)
-      console.log(diffArr(oldTotalImg, newImgList))
+      // console.log(newImgList)
+      // console.log(diffArr(oldTotalImg, newImgList))
       var delImgList = diffArr(oldTotalImg, newImgList)
-      console.log(delImgList)
+      // console.log(delImgList)
       if (delImgList) {
         for (var i = 0; i < delImgList.length; i++) {
         // 将图片路径中的文件名取出来
@@ -254,6 +254,7 @@ export default {
         console.log(response)
         // 防止工具函数formatHTML抓body中的内容为空
         response.content = '<!DOCTYPE html><html><head></head><body>' + response.content + '</body></html>'
+        response.weight = toStar(response.weight)
         that.postForm = response
         // 获取原先文章中的图片，转换为数组
         oldImgList = getImgList(that.postForm.content)
@@ -359,7 +360,7 @@ export default {
       if (this.isEdit) {
         // 编辑新闻路由下提交
         const nid = this.$route.params.id
-        editNewsData(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+        editNewsData(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, star(that.postForm.weight), this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
           console.log(response)
           if (response.code === 200) {
             that.loading = false
@@ -390,7 +391,7 @@ export default {
         })
       } else {
         // 添加新闻路由下提交
-        addOneNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+        addOneNews(this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, star(that.postForm.weight), this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
           console.log(response)
           if (response.code === 200) {
             that.loading = false
@@ -460,7 +461,7 @@ export default {
         nid = this.$route.params.id
       }
       // 编辑新闻路由下
-      draftNews(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, this.postForm.weight, this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
+      draftNews(nid, this.postForm.status, this.postForm.title, str, this.postForm.image, this.postForm.time, star(that.postForm.weight), this.postForm.name, this.postForm.source, this.postForm.classify).then(response => {
         console.log(response)
         if (response.code === 200) {
           that.loading = false

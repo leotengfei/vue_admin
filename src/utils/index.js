@@ -89,6 +89,7 @@ export function getImgList(str) {
 }
 
 export function diffArr(arr1, arr2) {
+  // 找出两个数组的不同项，输出一个新数组
   var newArr = []
   var arr3 = []
   if (arr1 === undefined) {
@@ -112,4 +113,31 @@ export function diffArr(arr1, arr2) {
   }
   newArr = arr3.concat(arr4)
   return newArr
+}
+
+export function star(data) {
+  // 评级组件值转为权值
+  const statusMap = {
+    0: 0,
+    1: 2500,
+    2: 5000,
+    3: 7500,
+    4: 9999
+  }
+  return statusMap[data]
+}
+
+export function toStar(data) {
+  // 权值转为评级组件的值
+  if (data !== 0 && data !== 2500 && data !== 5000 && data !== 7500 && data !== 9999) {
+    data = 0
+  }
+  const statusMap = {
+    0: 0,
+    2500: 1,
+    5000: 2,
+    7500: 3,
+    9999: 4
+  }
+  return statusMap[data]
 }

@@ -110,6 +110,7 @@
 
 <script>
 import { getList, getNewsContent, audit, delNews, draftNews, exportExcel } from '@/api/xinwen'
+import { toStar } from '@/utils/index'
 import waves from '@/directive/waves' // 水波纹指令
 import nopic from '@/assets/nopic.jpg'
 
@@ -359,6 +360,9 @@ export default {
       getList(pageSize, currentPage, this.listQuery.title, this.listQuery.time, this.listQuery.classify, this.listQuery.status).then(response => {
         // console.log(response.data)
         this.listLoading = false
+        for (var i = 0; i < response.data.length; i++) {
+          response.data[i].weight = toStar(response.data[i].weight)
+        }
         this.list = response.data
         this.total = response.count
       }).catch(err => {
@@ -381,9 +385,15 @@ export default {
         this.dialogLoading = false
         var poster = ''
         if (response.image) {
-          poster = `<img src='${response.image}'></img>`
+          poster = `
+          <img src='${response.image}'></img>
+          <p style="text-align:center">文章封面</p>
+          <hr>`
         } else {
-          poster = `<img src='${nopic}'></img>`
+          poster = `
+          <img src='${nopic}'></img>
+          <p style="text-align:center">文章封面</p>
+          <hr>`
           // 没有图的时候加载占位图
         }
         this.centerDialogContent = poster + response.content
