@@ -117,8 +117,8 @@ import nopic from '@/assets/nopic.jpg'
 const fenleiTypeOptions = [
   { key: 'POL', display_name: '政策法规' },
   { key: 'EXA', display_name: '升学考试' },
-  { key: 'EDU', display_name: '亲子教育' },
-  { key: 'FUN', display_name: '轻松一刻' }
+  { key: 'EDU', display_name: '家庭教育' },
+  { key: 'FUN', display_name: '搞笑娱乐' }
 ]
 
 const statusTypeOptions = [
