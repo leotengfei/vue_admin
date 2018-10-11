@@ -71,7 +71,7 @@ export default {
       const objKeyArr = Object.keys(this.listObj)
       for (let i = 0, len = objKeyArr.length; i < len; i++) {
         if (this.listObj[objKeyArr[i]].uid === uid) {
-          this.listObj[objKeyArr[i]].url = 'http://p9mwnc6fh.bkt.clouddn.com/' + response.key // 拼接七牛云文件路径
+          this.listObj[objKeyArr[i]].url = 'http://xiaochengxu.starbaby.top/' + response.key // 拼接七牛云文件路径
           this.listObj[objKeyArr[i]].hasSuccess = true
           return
         }

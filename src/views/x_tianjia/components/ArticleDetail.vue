@@ -299,7 +299,7 @@ export default {
     },
     handleAvatarSuccess(res, file) {
       if (file.status === 'success') {
-        this.postForm.image = 'http://p9mwnc6fh.bkt.clouddn.com/' + res.key
+        this.postForm.image = 'http://xiaochengxu.starbaby.top/' + res.key
         this.isClickedUpload = true
         this.$notify({
           title: '成功',
