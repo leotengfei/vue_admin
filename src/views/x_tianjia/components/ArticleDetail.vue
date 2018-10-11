@@ -189,11 +189,11 @@ export default {
         value: '升学考试',
         label: '升学考试'
       }, {
-        value: '亲子教育',
-        label: '亲子教育'
+        value: '家庭教育',
+        label: '家庭教育'
       }, {
-        value: '轻松一刻',
-        label: '轻松一刻'
+        value: '搞笑娱乐',
+        label: '搞笑娱乐'
       }],
       dialogImageUrl: '',
       listObj: {},
